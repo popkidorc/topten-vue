@@ -26,7 +26,7 @@
             hide-ok="true"
             @cancel="handleLoginCancel"
           >
-            <pdf-view v-if="pdfSrc" :source="pdfSrc" />
+            <PdfView :source="pdfSrc" />
           </a-modal>
         </div>
 
@@ -123,11 +123,11 @@
 
 <script>
   import ajax from '../../utils/axios';
-  import pdfView from '../../components/pdfView.vue';
+  import PdfView from '../../components/pdfView.vue';
 
   export default {
     components: {
-      pdfView,
+      PdfView,
     },
     data() {
       return {
@@ -164,7 +164,7 @@
             this.reportDetail = data;
           })
           .catch((error) => {
-            // this.$message.error(error)
+            this.$message.error(error)
           })
           .finally(() => {
             this.loading = false;

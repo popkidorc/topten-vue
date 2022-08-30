@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="loginView">
     <div class="logo">
       <img
         alt="logo"
@@ -9,18 +9,18 @@
     </div>
     <LoginBanner />
     <div class="content">
-      <LoginForm />
+      <LoginFormView />
     </div>
   </div>
 </template>
 
 <script setup>
   import LoginBanner from './components/banner.vue';
-  import LoginForm from './components/login-form.vue';
+  import LoginFormView from '../../components/loginFormView.vue';
 </script>
 
 <style lang="less">
-  .container {
+  .loginView {
     display: flex;
     height: 100vh;
 

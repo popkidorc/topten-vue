@@ -29,7 +29,7 @@
         </a-form-item>
 
         <a-form-item field="file" label="报告上传">
-          <a-upload action="/" :default-file-list="fileList" accept=".pdf" />
+          <a-upload :action="uploadUrl" :file-list="fileList" :onSuccess="uploadSuccess" accept=".pdf" :limit="1"/>
         </a-form-item>
 
         <a-form-item field="radio" label="" class="report-type">
@@ -56,7 +56,7 @@
         </a-form-item>
 
         <a-form-item>
-          <a-button html-type="submit">Submit</a-button>
+          <a-button html-type="submit" @click="createReport">Submit</a-button>
         </a-form-item>
       </a-form>
     </a-layout-content>
@@ -64,13 +64,15 @@
 </template>
 
 <script>
-  import ajax from '../../utils/axios';
+  import ajax, {baseURL} from '../../utils/axios';
 
   export default {
     data() {
       return {
         loading: false,
         reportDetail: {},
+        uploadUrl: baseURL+"/report/uploadReport.json",
+        fileList: []
       };
     },
     mounted() {},
@@ -78,6 +80,41 @@
       back() {
         this.$router.back();
       },
+      uploadSuccess(file){
+        ajax({
+          url: '/report/getReportUrl.json',
+          method: 'get',
+          params: {
+            key: `report/${file.name}`,
+          },
+          controller: new AbortController(),
+        })
+          .then((data) => {
+            // this.recommendReportList = data;
+
+            console.info(data);
+            // if (data.flag === 1) {
+            //   this.queryResult = data.data
+            // } else {
+            //   this.$message({
+            //     message: data.msg,
+            //     type: 'warning'
+            //   })
+            // }
+          })
+          .catch((error) => {
+            console.info(error);
+            this.$message.error(error);
+          })
+          .finally(() => {
+          });
+      },
+      createReport() {
+        // console.info(baseURL);
+        // console.info(this.fileList.length);
+
+        
+      }
     },
   };
 </script>

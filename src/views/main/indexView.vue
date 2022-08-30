@@ -73,7 +73,7 @@
                         ok-text="暂不登录"
                         @cancel="handleLoginCancel"
                       >
-                        <LoginForm />
+                        <LoginFormView />
                       </a-modal>
                     </div>
                   </a-button>
@@ -91,11 +91,11 @@
 </template>
 
 <script>
-  import LoginForm from '../login/components/login-form.vue';
+  import LoginFormView from '../../components/loginFormView.vue';
 
   export default {
     components: {
-      LoginForm,
+      LoginFormView,
     },
     data() {
       return {
@@ -128,7 +128,7 @@
         console.info(cookie);
 
         // 未登录
-        if (cookie === null) {
+        if (cookie !== null) {
           this.loginVisible = true;
         } else {
           this.$router.push({
