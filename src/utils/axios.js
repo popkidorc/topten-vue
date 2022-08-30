@@ -1,0 +1,77 @@
+// 引入axios
+import axios from 'axios';
+
+const baseURL = 'http://localhost:8080';
+const token = '';
+
+// 创建实例
+const instance = axios.create({
+  // `baseURL` 将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
+  // 它可以通过设置一个 `baseURL` 便于为 axios 实例的方法传递相对 URL
+  baseURL,
+  // `timeout` 指定请求超时的毫秒数。
+  // 如果请求时间超过 `timeout` 的值，则请求会被中断
+  timeout: 1000 * 10, // 默认值是 `0` (永不超时)
+  // 自定义请求头
+  headers: {
+    'Content-Type': 'application/json;charset=utf-8',
+  },
+  // `withCredentials` 表示跨域请求时是否需要使用凭证
+  // withCredentials: true,
+});
+
+// 添加请求拦截器
+instance.interceptors.request.use(
+  (config) => {
+    // 在发送请求之前做些什么
+    // 自己的config 处理
+    // 设置token
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    return config;
+  },
+  (error) => {
+    // 对请求错误做些什么
+    return Promise.reject(error);
+  }
+);
+
+// 添加响应拦截器
+instance.interceptors.response.use(
+  (response) => {
+    // 2xx 范围内的状态码都会触发该函数。
+    const { code } = response.data;
+    // 对接口返回的内部code值判断操作
+    if (code === 401) {
+      this.$message.error('没有权限');
+    } else if (code === 500) {
+      this.$message.error('系统错误');
+    }
+    // 对响应数据做点什么
+    return response.data;
+  },
+  (error) => {
+    // 超出 2xx 范围的状态码都会触发该函数。
+    // this.$message.error(error.message); // 统一报错提示
+    // 对响应错误做点什么
+    return Promise.reject(error);
+  }
+);
+
+// 导出request
+export default function request({
+  method = 'get', // 请求方式 默认get
+  url = '', // 地址
+  data = {}, // post参数
+  params = {}, // get参数
+  controller, // 取消请求传入 new AbortController()
+}) {
+  const signal = controller ? controller.signal : undefined;
+  return instance({
+    method,
+    url,
+    data,
+    params,
+    signal,
+  });
+}
