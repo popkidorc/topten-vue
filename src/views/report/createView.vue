@@ -80,12 +80,16 @@
       back() {
         this.$router.back();
       },
-      uploadSuccess(file){
+      uploadSuccess(file,response){
+        console.info(file);
+        console.info(file.response);
+        
+
         ajax({
           url: '/report/getReportUrl.json',
           method: 'get',
           params: {
-            key: `report/${file.name}`,
+            resourceId: file.response,
           },
           controller: new AbortController(),
         })
