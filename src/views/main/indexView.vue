@@ -138,7 +138,7 @@
         console.info(cookie);
 
         // 未登录
-        if (cookie !== null) {
+        if (cookie === null) {
           this.loginVisible = true;
         } else {
           this.$router.push({

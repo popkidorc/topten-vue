@@ -2,8 +2,8 @@
   <div class="loginFormView">
     <a-tabs default-active-key="1" justify="true" header-padding="false">
       <a-tab-pane key="1" title="扫码登录"> 扫码登录 </a-tab-pane>
-      <a-tab-pane key="2" title="验证码登录"> 验证码登录 </a-tab-pane>
-      <a-tab-pane key="3" title="密码登录">
+      
+      <a-tab-pane key="2" title="验证码登录">
         <a-form
           ref="userInfo"
           :model="userInfo"
@@ -62,6 +62,8 @@
           </a-space>
         </a-form>
       </a-tab-pane>
+
+      <a-tab-pane key="3" title="密码登录"> 密码登录 </a-tab-pane>
     </a-tabs>
   </div>
 </template>
@@ -181,13 +183,25 @@
     }
   }
 
-  .arco-form-item-error {
-    margin-bottom: 20px;
-  }
+  .arco-input-wrapper {
 
-  .arco-form-item-status-error{
+    
+    &:hover,
+    &:focus,
+    &:focus-within,
+    &:focus-visible {
       background-color: transparent;
       border-color: transparent;
+    }
+
+    &:not(.arco-input-disabled).arco-input-focus {
+      background-color: transparent;
+      border-color: transparent;
+    }
+  }
+
+  .arco-form-item-error {
+    margin-bottom: 20px;
   }
 
   .arco-tabs-content-item-active {
