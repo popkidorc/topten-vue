@@ -10,7 +10,7 @@
     <a-layout>
       <a-layout-content style="width: 668px" class="layout-left">
         <div class="img-container">
-          <img height="400" :src="reportDetail.imageUrl" />
+          <img height="400" :src="reportDetail.imageResourceVo.downloadUrl" />
           <div v-show="show" class="img-mask" @click="openPdf">
             <div class="prev-btn">点击预览</div>
           </div>
@@ -105,14 +105,15 @@
         >
           <template #item="{ item }">
             <a-list-item>
-              <a-card hoverable @click="detail(item)">
+              <!-- <a-card hoverable @click="detail(item)">
                 <template #cover>
                   <div class="img-div">
                     <img class="img" alt="dessert" :src="item.imageUrl" />
                   </div>
                 </template>
                 <a-card-meta :title="item.name"> </a-card-meta>
-              </a-card>
+              </a-card> -->
+              <ReportCardSmallView :item="item"/>
             </a-list-item>
           </template>
         </a-list>
@@ -122,102 +123,112 @@
 </template>
 
 <script>
-  import ajax from '../../utils/axios';
-  import PdfView from '../../components/pdfView.vue';
+import ajax from '../../utils/axios';
+import PdfView from '../../components/pdfView.vue';
+import ReportCardSmallView from '../../components/reportCardSmallView.vue';
 
-  export default {
-    components: {
-      PdfView,
-    },
-    data() {
-      return {
-        loading: false,
-        title: this.$route.query.name,
-        reportDetail: {},
-        pdfSrc:
-          'https://kid-topten.oss-cn-hangzhou.aliyuncs.com/report/%E2%80%9D%E8%B6%85%E8%B6%8A%E5%A2%9E%E9%95%BF%E2%80%9C--2020%E6%99%BA%E6%85%A7%E5%B1%8F%E8%A1%8C%E4%B8%9A%E5%8F%91%E5%B1%95%E7%99%BD%E7%9A%AE%E4%B9%A6.pdf?Expires=1661803460&OSSAccessKeyId=TMP.3KdnDmV7kY2ijTrYR5v3XsY2kgNT6LkoEguHuXo7oAet8mqAuX9NwwwqSDuNxgL8f3xHp3V7r5ApzYnGUqUZr7za8ketxk&Signature=Qs8aYY1rn8G9sXGESey6xgMrQVk%3D',
-        recommendReportList: [],
-        pdfVisible: false,
-        show: true,
-      };
-    },
-    watch: {
-      // 如果路由发生变化，再次执行该方法
-      '$route.query.id': ['loadDetail', 'loadRecommendReportList'],
-    },
-    mounted() {
-      this.loadDetail();
-      this.loadRecommendReportList();
-    },
-    methods: {
-      async loadDetail() {
-        this.loading = true;
-        ajax({
-          url: '/report/detail.json',
-          method: 'get',
-          params: {
-            id: this.$route.query.id,
-          },
-          controller: new AbortController(),
+export default {
+  components: {
+    PdfView,
+  },
+  data() {
+    return {
+      loading: false,
+      title: this.$route.query.name,
+      reportDetail: {
+        imageResourceVo:{},
+        resourceVo:{}
+      },
+      pdfSrc:"",
+      recommendReportList: [],
+      pdfVisible: false,
+      show: true,
+    };
+  },
+  components: {
+    ReportCardSmallView,
+  },
+  watch: {
+    // 如果路由发生变化，再次执行该方法
+    '$route.query.id': ['loadDetail', 'loadRecommendReportList'],
+  },
+  mounted() {
+    this.loadDetail();
+    this.loadRecommendReportList();
+  },
+  methods: {
+    async loadDetail() {
+      if(this.$route.query.id === undefined){
+        return;
+      }
+      this.loading = true;
+      ajax({
+        url: '/report/detail.json',
+        method: 'get',
+        params: {
+          id: this.$route.query.id,
+        },
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          this.reportDetail = data;
         })
-          .then((data) => {
-            this.reportDetail = data;
-          })
-          .catch((error) => {
-            this.$message.error(error)
-          })
-          .finally(() => {
-            this.loading = false;
-          });
-      },
-      async loadRecommendReportList() {
-        this.loading = true;
-
-        ajax({
-          url: '/main/getRecommendReportList.json',
-          method: 'get',
-          params: {
-            curPage: 1,
-          },
-          controller: new AbortController(),
+        .catch((error) => {
+          this.$message.error(error)
         })
-          .then((data) => {
-            this.recommendReportList = data;
-            // if (data.flag === 1) {
-            //   this.queryResult = data.data
-            // } else {
-            //   this.$message({
-            //     message: data.msg,
-            //     type: 'warning'
-            //   })
-            // }
-          })
-          .catch((error) => {
-            console.info(error);
-            this.$message.error(error);
-          })
-          .finally(() => {
-            this.loading = false;
-          });
-      },
-
-      back() {
-        this.$router.back();
-      },
-      detail(item) {
-        this.$router.push({
-          path: '/detail',
-          query: {
-            id: item.id,
-          },
+        .finally(() => {
+          this.loading = false;
         });
-      },
-
-      openPdf() {
-        this.pdfVisible = true;
-      },
     },
-  };
+    async loadRecommendReportList() {
+      if(this.$route.query.id === undefined){
+        return;
+      }
+      this.loading = true;
+      ajax({
+        url: '/main/getRecommendReportList.json',
+        method: 'get',
+        params: {
+          curPage: 1,
+        },
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          this.recommendReportList = data;
+          // if (data.flag === 1) {
+          //   this.queryResult = data.data
+          // } else {
+          //   this.$message({
+          //     message: data.msg,
+          //     type: 'warning'
+          //   })
+          // }
+        })
+        .catch((error) => {
+          this.$message.error(error);
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+
+    back() {
+      this.$router.back();
+    },
+    detail(item) {
+      this.$router.push({
+        path: '/detail',
+        query: {
+          id: item.id,
+        },
+      });
+    },
+
+    openPdf() {
+      this.pdfVisible = true;
+    },
+  },
+};
 </script>
 
 <style lang="less">
@@ -253,10 +264,12 @@
           height: 100%;
 
           .prev-btn {
-            padding: 4px 6px;
+            padding: 12px 16px;
             // 基本样式
             color: #fff;
-            border: 1px solid #fff;
+            font-size: 16px;
+            font-weight: 500;
+            border: 2px solid #fff;
             border-radius: 4px;
           }
         }
@@ -268,7 +281,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(0, 0, 200, 0.6);
+            // background-color: rgba(160, 160, 160, 0.4);
+            background-color: rgba(54, 55, 65, 0.4);
           }
         }
       }

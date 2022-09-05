@@ -170,10 +170,12 @@
   }
 
   .arco-input-wrapper {
-    :hover,
-    :focus,
-    :focus-within,
-    :focus-visible {
+
+    
+    &:hover,
+    &:focus,
+    &:focus-within,
+    &:focus-visible {
       background-color: transparent;
       border-color: transparent;
     }
@@ -181,6 +183,11 @@
 
   .arco-form-item-error {
     margin-bottom: 20px;
+  }
+
+  .arco-form-item-status-error{
+      background-color: transparent;
+      border-color: transparent;
   }
 
   .arco-tabs-content-item-active {

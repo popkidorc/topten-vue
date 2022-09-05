@@ -3,7 +3,7 @@
     <a-card hoverable @click="detail(item)">
       <template #cover>
         <div class="img-div">
-          <img class="img" :src="item.imageUrl" />
+          <img class="img" :src="item.imageResourceVo.downloadUrl" />
         </div>
       </template>
       <a-card-meta :title="item.name"> </a-card-meta>

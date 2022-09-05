@@ -13,22 +13,30 @@
       >
         <img src="@/assets/images/logo.png" class="logo" />
 
-        <a-menu :default-open-keys="['0_1']" @menuItemClick="onClickMenuItem">
+        <a-menu  @menuItemClick="onClickMenuItem">
           <a-menu-item key="main">
             <icon-thumb-up-fill :size="22" />
             推荐
           </a-menu-item>
           <a-menu-item key="class-C001">
             <icon-skin :size="22" />
-            消费品
+            快销品
           </a-menu-item>
           <a-menu-item key="class-C002">
             <icon-bar-chart :size="22" />
+            食品
+          </a-menu-item>
+          <a-menu-item key="class-C003">
+            <icon-send :size="22" />
             金融
           </a-menu-item>
+          <a-menu-item key="class-C004">
+            <icon-robot :size="22" />
+            科技
+          </a-menu-item>
           <a-menu-item key="class-C000">
-            <IconCalendar :size="22" />
-            房产
+            <icon-more :size="22" />
+            其他
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
@@ -91,6 +99,7 @@
 </template>
 
 <script>
+  import ajax from '../../utils/axios';
   import LoginFormView from '../../components/loginFormView.vue';
 
   export default {
@@ -99,10 +108,11 @@
     },
     data() {
       return {
-        loginVisible: false,
+        loginVisible: false
       };
     },
-    mounted() {},
+    mounted() {
+    },
     methods: {
       onClickMenuItem(key) {
         this.$router.push({

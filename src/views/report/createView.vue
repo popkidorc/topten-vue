@@ -18,23 +18,29 @@
           label="报告名称"
           :rules="[{ required: true, message: '请填写报告名称' }]"
         >
-          <a-input v-model="reportDetail.name" placeholder="请输入名称" />
+        <a-input v-model="reportDetail.name" placeholder="请输入名称" />
         </a-form-item>
-        <a-form-item field="post" label="报告描述">
+
+        <a-form-item field="describe" label="报告描述">
           <a-textarea
-            v-model="reportDetail.description"
+            v-model="reportDetail.describe"
             placeholder="请输入描述"
             allow-clear
           />
         </a-form-item>
 
+        <a-form-item field="reportClass" label="报告描述">
+          <a-checkbox-group :max="3" v-model="reportDetail.reportClass" :options="reportClasses" />
+        </a-form-item>
+            
+
         <a-form-item field="file" label="报告上传">
           <a-upload :action="uploadUrl" :file-list="fileList" :onSuccess="uploadSuccess" accept=".pdf" :limit="1"/>
         </a-form-item>
 
-        <a-form-item field="radio" label="" class="report-type">
-          <a-radio-group v-model="reportDetail.reportType" direction="vertical">
-            <a-radio value="radio one">
+        <a-form-item field="publishType" label="" class="report-type">
+          <a-radio-group v-model="reportDetail.publishType" direction="vertical">
+            <a-radio value="0">
               <icon-arrow-fall />
               <div>
                 <div class="radio-title">公开的</div>
@@ -43,7 +49,7 @@
                 >
               </div>
             </a-radio>
-            <a-radio value="radio two">
+            <a-radio value="1">
               <icon-arrow-left />
               <div>
                 <div class="radio-title">私有的</div>
@@ -58,6 +64,7 @@
         <a-form-item>
           <a-button html-type="submit" @click="createReport">Submit</a-button>
         </a-form-item>
+
       </a-form>
     </a-layout-content>
   </a-layout>
@@ -71,20 +78,44 @@
       return {
         loading: false,
         reportDetail: {},
+        reportClasses: [],
         uploadUrl: baseURL+"/report/uploadReport.json",
         fileList: []
       };
     },
-    mounted() {},
+    mounted() {
+      this.initReportClasses();
+    },
     methods: {
       back() {
         this.$router.back();
       },
+      initReportClasses(){
+        ajax({
+          url: '/report/getReportClasses.json',
+          method: 'get',
+          params: {},
+          controller: new AbortController(),
+        })
+          .then((data) => {
+            console.info(data);
+            data.forEach(element => {
+              console.info(element);
+              this.reportClasses.push({
+                label: element.value,
+                value: element.key
+              });
+            });
+          })
+          .catch((error) => {
+            this.$message.error(error);
+          })
+          .finally(() => {
+          });
+      },
       uploadSuccess(file,response){
-        console.info(file);
-        console.info(file.response);
         
-
+        this.reportDetail.resourceId = file.response;
         ajax({
           url: '/report/getReportUrl.json',
           method: 'get',
@@ -107,15 +138,45 @@
             // }
           })
           .catch((error) => {
-            console.info(error);
+            
             this.$message.error(error);
           })
           .finally(() => {
           });
       },
       createReport() {
-        // console.info(baseURL);
-        // console.info(this.fileList.length);
+        console.info(this.reportDetail.reportClass);
+        ajax({
+          url: '/report/create.json',
+          method: 'get',
+          params: {
+            name: this.reportDetail.name,
+            describe: this.reportDetail.describe,
+            reportClasses: this.reportDetail.reportClass.join(),
+            resourceId: this.reportDetail.resourceId,
+            publishType: this.reportDetail.publishType,
+          },
+          controller: new AbortController(),
+        })
+          .then((data) => {
+            // this.recommendReportList = data;
+
+            console.info(data);
+            // if (data.flag === 1) {
+            //   this.queryResult = data.data
+            // } else {
+            //   this.$message({
+            //     message: data.msg,
+            //     type: 'warning'
+            //   })
+            // }
+          })
+          .catch((error) => {
+            console.info(error);
+            this.$message.error(error);
+          })
+          .finally(() => {
+          });
 
         
       }
@@ -157,10 +218,16 @@
       }
     }
 
+    
+
     .arco-form-item-label {
       color: #e2e2e3;
       font-weight: 600;
       font-size: 14px;
+    }
+
+    .arco-checkbox-label{
+      color: #e2e2e3;
     }
 
     .arco-radio-label {
