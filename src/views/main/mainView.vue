@@ -129,7 +129,6 @@ import ReportCardSmallView from '../../components/reportCardSmallView.vue';
             // }
           })
           .catch((error) => {
-            console.info(error);
             this.$message.error(error);
           })
           .finally(() => {

@@ -81,7 +81,7 @@
                         ok-text="暂不登录"
                         @cancel="handleLoginCancel"
                       >
-                        <LoginFormView />
+                        <LoginFormView @loginSuccess="loginSuccess"/>
                       </a-modal>
                     </div>
                   </a-button>
@@ -108,7 +108,8 @@
     },
     data() {
       return {
-        loginVisible: false
+        loginVisible: false,
+        // isLogin: false,
       };
     },
     mounted() {
@@ -134,11 +135,10 @@
       },
       uploadReport() {
         // 是否登录
-        const cookie = this.$cookies.get('toptenauth');
-        console.info(cookie);
-
+        var toptenauth = this.$cookies.get("toptenauth");
+        console.info(toptenauth);
         // 未登录
-        if (cookie === null) {
+        if (toptenauth === null) {
           this.loginVisible = true;
         } else {
           this.$router.push({
@@ -149,6 +149,12 @@
       },
       handleLoginCancel() {
         this.loginVisible = false;
+      },
+      loginSuccess(token){
+        this.loginVisible = false;
+        console.info("==father loginSuccess==");
+        console.info(token);
+
       },
     },
   };

@@ -92,29 +92,25 @@
           params: {
             phone: this.userInfo.username,
             password: this.userInfo.password,
+            loginRole: 1,
+            source: "1",
           },
           controller: new AbortController(),
         })
           .then((data) => {
-            console.info('===login===');
+            console.info('===login1===');
             console.info(data.token);
+            console.info('===login2===');
+            var toptenauth = this.$cookies.get("toptenauth");
+            console.info(toptenauth);
             if (data !== null && data.token !== '') {
-              this.$router.push({
-                path: '/index',
-                query: {},
-              });
+
+              console.info('===login3===');
+              this.$emit('loginSuccess', data.token);
             }
-            // if (data.flag === 1) {
-            //   this.queryResult = data.data
-            // } else {
-            //   this.$message({
-            //     message: data.msg,
-            //     type: 'warning'
-            //   })
-            // }
           })
           .catch((error) => {
-            // this.$message.error(error)
+            this.$message.error(error)
           })
           .finally(() => {
             this.loading = false;

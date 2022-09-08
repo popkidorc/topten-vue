@@ -7,10 +7,13 @@ export default mergeConfig(
   {
     mode: 'development',
     server: {
-      open: true,
+      host: 'www.topten.com',
+      port: 80,
+      // open: true,
       fs: {
         strict: true,
       },
+      https:false
     },
     plugins: [
       // eslint({

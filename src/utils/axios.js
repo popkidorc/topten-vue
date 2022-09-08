@@ -1,7 +1,7 @@
 // 引入axios
 import axios from 'axios';
 
-export const baseURL = 'http://localhost:8080';
+export const baseURL = 'http://www.topten.com:8080';
 const token = '';
 
 // 创建实例
@@ -17,7 +17,7 @@ const instance = axios.create({
     'Content-Type': 'application/json;charset=utf-8',
   },
   // `withCredentials` 表示跨域请求时是否需要使用凭证
-  // withCredentials: true,
+  withCredentials: true,
 });
 
 // 添加请求拦截器
