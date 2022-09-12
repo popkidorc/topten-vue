@@ -50,15 +50,11 @@ import ReportCardSmallView from '../../components/reportCardSmallView.vue';
           controller: new AbortController(),
         })
           .then((data) => {
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
             this.gridList = data;
-            // if (data.flag === 1) {
-            //   this.queryResult = data.data
-            // } else {
-            //   this.$message({
-            //     message: data.msg,
-            //     type: 'warning'
-            //   })
-            // }
           })
           .catch((error) => {
             console.info(error);

@@ -98,6 +98,11 @@
           controller: new AbortController(),
         })
           .then((data) => {
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
+
             console.info(data);
             data.forEach(element => {
               console.info(element);
@@ -125,7 +130,11 @@
           controller: new AbortController(),
         })
           .then((data) => {
-            // this.recommendReportList = data;
+
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
 
             console.info(data);
             // if (data.flag === 1) {
@@ -159,8 +168,11 @@
           controller: new AbortController(),
         })
           .then((data) => {
-            // this.recommendReportList = data;
 
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
             console.info(data);
             // if (data.flag === 1) {
             //   this.queryResult = data.data

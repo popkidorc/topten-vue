@@ -171,6 +171,10 @@ export default {
         controller: new AbortController(),
       })
         .then((data) => {
+          if (data.flag === false) {
+            this.$message.error(data.message);
+            return;
+          }
           this.reportDetail = data;
         })
         .catch((error) => {
@@ -194,15 +198,11 @@ export default {
         controller: new AbortController(),
       })
         .then((data) => {
+          if (data.flag === false) {
+            this.$message.error(data.message);
+            return;
+          }
           this.recommendReportList = data;
-          // if (data.flag === 1) {
-          //   this.queryResult = data.data
-          // } else {
-          //   this.$message({
-          //     message: data.msg,
-          //     type: 'warning'
-          //   })
-          // }
         })
         .catch((error) => {
           this.$message.error(error);

@@ -59,7 +59,8 @@
               </a-col>
               <a-col :span="8"> </a-col>
               <a-col :span="8">
-                <div class="right-button">
+                <!-- <div class="right-button"> -->
+                <a-space size="mini" class="right-button">
                   <a-button type="primary" shape="circle" class="button-one">
                     <icon-plus />
                   </a-button>
@@ -85,7 +86,18 @@
                       </a-modal>
                     </div>
                   </a-button>
-                </div>
+                  <a-dropdown trigger="hover" class="my-dropdown" >
+                    <a-avatar @click="toast" class="my-avatar" v-show="isLogin">
+                      <img
+                          alt="avatar"
+                          src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp"
+                        />
+                    </a-avatar>   
+                    <template #content>
+                      <a-doption @click="loginOut">退出登陆</a-doption>
+                    </template>
+                  </a-dropdown>  
+                </a-space>             
               </a-col>
             </a-row>
           </a-layout-header>
@@ -99,65 +111,91 @@
 </template>
 
 <script>
-  import ajax from '../../utils/axios';
-  import LoginFormView from '../../components/loginFormView.vue';
+import ajax from '../../utils/axios';
+import LoginFormView from '../../components/loginFormView.vue';
 
-  export default {
-    components: {
-      LoginFormView,
+export default {
+  components: {
+    LoginFormView,
+  },
+  data() {
+    return {
+      loginVisible: false,
+      isLogin: false,
+    };
+  },
+  mounted() {
+    this.checkLogin();
+  },
+  methods: {
+    checkLogin() {
+      // 是否登录
+      var toptenauth = this.$cookies.get("toptenauth");
+      // 未登录
+      if (toptenauth === null || toptenauth === "") {
+        this.isLogin = false;
+      } else {
+        this.isLogin = true;
+      }
     },
-    data() {
-      return {
-        loginVisible: false,
-        // isLogin: false,
-      };
+    onClickMenuItem(key) {
+      this.$router.push({
+        path: `/${key.split('-')[0]}`,
+        query: {
+          reportClass: key.split('-')[1],
+        },
+      });
+      // this.$router.push({path:"/menLink",query:{alert:"页面跳转成功"}})
+
+      // if(key === 'main'){
+
+      // }else{
+      //   console.info(key.split('-')[0]);
+      //   console.info(key.split('-')[1]);
+      // }
+
+      // this.$router.push({path: `/${key}`});
     },
-    mounted() {
-    },
-    methods: {
-      onClickMenuItem(key) {
+    uploadReport() {
+      // 是否登录
+      var toptenauth = this.$cookies.get("toptenauth");
+      // 未登录
+      if (toptenauth === null) {
+        this.loginVisible = true;
+      } else {
         this.$router.push({
-          path: `/${key.split('-')[0]}`,
-          query: {
-            reportClass: key.split('-')[1],
-          },
+          path: '/create',
+          query: {},
         });
-        // this.$router.push({path:"/menLink",query:{alert:"页面跳转成功"}})
-
-        // if(key === 'main'){
-
-        // }else{
-        //   console.info(key.split('-')[0]);
-        //   console.info(key.split('-')[1]);
-        // }
-
-        // this.$router.push({path: `/${key}`});
-      },
-      uploadReport() {
-        // 是否登录
-        var toptenauth = this.$cookies.get("toptenauth");
-        console.info(toptenauth);
-        // 未登录
-        if (toptenauth === null) {
-          this.loginVisible = true;
-        } else {
-          this.$router.push({
-            path: '/create',
-            query: {},
-          });
-        }
-      },
-      handleLoginCancel() {
-        this.loginVisible = false;
-      },
-      loginSuccess(token){
-        this.loginVisible = false;
-        console.info("==father loginSuccess==");
-        console.info(token);
-
-      },
+      }
     },
-  };
+    handleLoginCancel() {
+      this.loginVisible = false;
+    },
+    loginSuccess(token){
+      this.$message.success("登陆成功");
+      this.loginVisible = false;
+      this.checkLogin();
+    },
+    loginOut(){
+      ajax({
+        url: '/auth/loginOut.json',
+        method: 'post',
+        params: {},
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          this.$message.success("退出成功");
+          this.checkLogin();
+        })
+        .catch((error) => {
+          this.$message.error(error)
+        })
+        .finally(() => {
+        });
+    }
+  },
+};
 </script>
 
 <style lang="less">
@@ -297,48 +335,86 @@
             background: #f22a51;
           }
         }
-      }
+
+        .my-avatar{
+          width: 36px;
+          height: 36px;
+          margin-top: 10px;
+          margin-right: 32px;
+          cursor: pointer;
+
+          &:hover {
+            width: 38px;
+            height: 38px;
+            margin-left: -1px;
+            margin-right: 31px;
+          }
+        }
     }
   }
+}
 
-  .login-modal {
-    width: 480px;
-    height: 480px;
-    padding: 24px 38px 40px;
+
+
+.login-modal {
+  width: 480px;
+  height: 480px;
+  padding: 24px 38px 40px;
+  font-weight: 500;
+  font-size: 24px;
+  background: #fff
+    url(https://lf1-cdn-tos.bytegoofy.com/goofy/ies/douyin_web/image/login-resetpwd-bg.d8696d27.png)
+    no-repeat;
+  background-size: 190% auto;
+  border-radius: 8px;
+
+  .arco-modal-header {
+    margin-bottom: 12px;
+  }
+
+  .arco-modal-title {
     font-weight: 500;
     font-size: 24px;
-    background: #fff
-      url(https://lf1-cdn-tos.bytegoofy.com/goofy/ies/douyin_web/image/login-resetpwd-bg.d8696d27.png)
-      no-repeat;
-    background-size: 190% auto;
-    border-radius: 8px;
-
-    .arco-modal-header {
-      margin-bottom: 12px;
-    }
-
-    .arco-modal-title {
-      font-weight: 500;
-      font-size: 24px;
-    }
-
-    .arco-modal-footer {
-      display: none;
-    }
   }
 
-  .login-modal-body {
-    position: relative;
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
+  .arco-modal-footer {
+    display: none;
+  }
+}
+
+.login-modal-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 404px;
+  height: 370px;
+  padding-bottom: 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 30px rgb(0 0 0 / 5%);
+}
+.my-dropdown{
+  top: 62px;
+  
+  .arco-dropdown {
     box-sizing: border-box;
-    width: 404px;
-    height: 370px;
-    padding-bottom: 40px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 1px 30px rgb(0 0 0 / 5%);
+    padding: 4px 0;
+    border: none;
+    border-radius: var(--border-radius-medium);
+    box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+    background: #252632;
+
+    .arco-dropdown-option-content{
+      font-weight: 400;
+      font-size: 14px;
+      color: #fff;
+    }
+    
+    
   }
+}
+
 </style>

@@ -24,20 +24,20 @@
             </a-input>
           </a-form-item>
           <a-form-item
-            field="password"
-            :rules="[{ required: true, message: '请输入密码' }]"
-            :validate-trigger="['change', 'blur']"
+            field="vertifyCode"
+            :rules="[{ required: true, message: '请输入验证码' }]"
+            :validate-trigger="['change']"
             hide-label
           >
-            <a-input-password
-              v-model="userInfo.password"
-              placeholder="请输入密码（8位数字加字母）"
-              allow-clear
-            >
-              <template #prefix>
-                <icon-lock />
-              </template>
-            </a-input-password>
+            <a-input-search 
+              v-model="userInfo.vertifyCode" 
+              placeholder="请输入6位验证码" 
+              button-text="发送验证码" 
+              search-button
+              class="verifycode"
+              @search="sendSmsVerifyCode()"
+              :loading="sendSmsVerifyCodeLoading"
+              />
           </a-form-item>
           <a-space :size="16" direction="vertical">
             <div class="login-form-password-actions">
@@ -74,6 +74,8 @@
   export default {
     data() {
       return {
+        sendSmsVerifyCodeLoading: false,
+
         loading: false,
         userInfo: {
           username: '',
@@ -82,31 +84,61 @@
         },
       };
     },
-    mounted() {},
+    mounted() {
+      // this.sendSmsVerifyCode();
+    },
+    events(){
+      
+    },
     methods: {
-      login() {
-        this.loading = true;
+
+      sendSmsVerifyCode(){
+        this.sendSmsVerifyCodeLoading = true;
         ajax({
-          url: '/auth/login.json',
+          url: '/auth/sendSmsVerifyCode.json',
           method: 'post',
           params: {
             phone: this.userInfo.username,
-            password: this.userInfo.password,
+            source: "1",
+            codeType: 3,
+          },
+          controller: new AbortController(),
+        })
+          .then((data) => {
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
+            this.$message.success("获取验证码成功");
+          })
+          .catch((error) => {
+            this.$message.error(error)
+          })
+          .finally(() => {
+            this.sendSmsVerifyCodeLoading = false;
+          });
+      },
+      login() {
+        console.info(this.$message);
+        this.loading = true;
+        ajax({
+          url: '/auth/fastlogin.json',
+          method: 'post',
+          params: {
+            phone: this.userInfo.username,
+            vertifyCode: this.userInfo.vertifyCode,
             loginRole: 1,
             source: "1",
           },
           controller: new AbortController(),
         })
           .then((data) => {
-            console.info('===login1===');
-            console.info(data.token);
-            console.info('===login2===');
-            var toptenauth = this.$cookies.get("toptenauth");
-            console.info(toptenauth);
+            if (data.flag === false) {
+              this.$message.error(data.message);
+              return;
+            }
             if (data !== null && data.token !== '') {
-
-              console.info('===login3===');
-              this.$emit('loginSuccess', data.token);
+                this.$emit('loginSuccess', data.token);
             }
           })
           .catch((error) => {
@@ -118,7 +150,6 @@
       },
       setRememberPassword(value) {
         this.userInfo.rememberPassword = value;
-        console.info(this.userInfo.rememberPassword);
       },
     },
   };
@@ -131,6 +162,9 @@
   height: 90%;
 
   .login-form {
+    .arco-form-item-wrapper-col {
+      padding: 8px;
+    }
     .login-form-error-msg {
       height: 52px;
       color: rgb(var(--red-6));
@@ -145,6 +179,17 @@
     .login-form-register-btn {
       color: var(--color-text-3) !important;
     }
+
+    .verifycode{
+
+      .arco-btn-primary {
+        height: 36px;
+        line-height: 0px;
+        font-weight: 400;
+        font-size: 14px;
+      }
+    }
+
   }
 
   .arco-tabs-nav-ink {

@@ -39,14 +39,6 @@ instance.interceptors.request.use(
 // 添加响应拦截器
 instance.interceptors.response.use(
   (response) => {
-    // 2xx 范围内的状态码都会触发该函数。
-    const { code } = response.data;
-    // 对接口返回的内部code值判断操作
-    if (code === 401) {
-      this.$message.error('没有权限');
-    } else if (code === 500) {
-      this.$message.error('系统错误');
-    }
     // 对响应数据做点什么
     return response.data;
   },
