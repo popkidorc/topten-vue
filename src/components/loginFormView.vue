@@ -1,9 +1,8 @@
 <template>
   <div class="loginFormView">
-    <a-tabs default-active-key="1" justify="true" header-padding="false">
-      <a-tab-pane key="1" title="扫码登录"> 扫码登录 </a-tab-pane>
-      
-      <a-tab-pane key="2" title="验证码登录">
+    <a-tabs default-active-key="1" justify="true" header-padding="false" @tab-click="getWxQr">
+    
+      <a-tab-pane key="1" title="验证码登录">
         <a-form
           ref="userInfo"
           :model="userInfo"
@@ -31,16 +30,17 @@
           >
             <a-input-search 
               v-model="userInfo.vertifyCode" 
-              placeholder="请输入6位验证码" 
-              button-text="发送验证码" 
+              placeholder="请输入6位验证码"
               search-button
               class="verifycode"
               @search="sendSmsVerifyCode()"
-              :loading="sendSmsVerifyCodeLoading"
-              />
+              :loading="!userInfo.username || codeButton.codeDisable"
+              :button-text="codeButton.codeText"
+              >
+            </a-input-search>
           </a-form-item>
           <a-space :size="16" direction="vertical">
-            <div class="login-form-password-actions">
+            <!-- <div class="login-form-password-actions">
               <a-checkbox
                 checked="rememberPassword"
                 :model-value="userInfo.rememberPassword"
@@ -49,7 +49,7 @@
                 记住密码
               </a-checkbox>
               <a-link>忘记密码</a-link>
-            </div>
+            </div> -->
             <a-button
               type="primary"
               html-type="submit"
@@ -61,98 +61,210 @@
             </a-button>
           </a-space>
         </a-form>
+        <a-modal
+          v-model:visible="slide.slideVisible"
+          title="滑动解锁"
+          modal-class="slide-modal"
+          simple="true"
+          hide-cancel="true"
+          hide-ok="true"
+          ok-text="暂不登录"
+          @cancel="handleSlideCancel()"
+        >
+          <slide-verify
+            ref="block"
+            slider-text="向右滑动->"
+            accuracy=5
+            :imgs="slide.imgs"
+            @success="slideSuccess"
+            @fail="slideFail"
+          ></slide-verify>
+        </a-modal>
       </a-tab-pane>
 
-      <a-tab-pane key="3" title="密码登录"> 密码登录 </a-tab-pane>
+      <a-tab-pane key="2" title="扫码登录" class="tab-pane-2">
+        <div class="img-title">
+          使用微信扫码登陆
+        </div>
+        <img
+          show-loader
+          class="qr-img"
+          :src="wxQr.src"
+        />
+      </a-tab-pane>
+      <!-- <a-tab-pane key="3" title="密码登录"> 密码登录 </a-tab-pane> -->
     </a-tabs>
   </div>
 </template>
 
 <script>
-  import ajax from '../utils/axios';
+import ajax from '../utils/axios';
+import SlideVerify from "vue3-slide-verify";
+import SlideImage from "../assets/images/slide.jpeg";
+import BlankImage from "../assets/images/blank.png";
 
-  export default {
-    data() {
-      return {
-        sendSmsVerifyCodeLoading: false,
+import "vue3-slide-verify/dist/style.css";
+export default {
+  data() {
+    return {
+      loading: false,
+      codeButton:{
+        codeText: "发送验证码",
+        codeDisable: false,
+      },
+      timer: null,
+      slide:{
+        slideVisible:false,
+        imgs:[SlideImage],
+      },
 
-        loading: false,
-        userInfo: {
-          username: '',
-          password: '',
-          rememberPassword: true,
+      userInfo: {
+        username: '',
+        password: '',
+      },
+      wxQr: {
+        validateId : "",
+        src: BlankImage,
+      }
+    };
+  },
+  components: { 
+    SlideVerify,
+  },
+  mounted() {
+  },
+  events(){
+    
+  },
+  methods: {
+
+    sendSmsVerifyCode(){
+      this.slide.slideVisible = true;
+    },
+    countDown(val){
+        //判断定时器是否存在
+        if(this.timer){
+          clearInterval(this.timer)
+        }
+        //setTiemOut 执行一次
+        // setInterval 不断执行，需要条件才会停止
+        let tim = val;
+        this.codeButton.codeDisable = true;
+        this.codeButton.codeText = `${tim}秒`;
+        this.timer = setInterval(()=>{
+            tim--;
+            if(tim === 0){
+              clearInterval(this.timer)
+              this.codeButton.codeDisable = false;
+              this.codeButton.codeText = "重新发送";
+            }else{
+              this.codeButton.codeDisable = true;
+              this.codeButton.codeText = `${tim}秒`;
+            }
+        },1000)
+    },
+    handleSlideCancel(){
+      this.slide.slideVisible = false;
+    },
+    slideSuccess(){
+      this.slide.slideVisible = false;
+      ajax({
+        url: '/auth/sendSmsVerifyCode.json',
+        method: 'post',
+        params: {
+          phone: this.userInfo.username,
+          source: "1",
+          codeType: 3,
         },
-      };
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          if (data.flag === false) {
+            this.$message.error(data.message);
+            return;
+          }
+          this.$message.success("获取验证码成功");
+          //倒计时
+          setTimeout(()=>{
+            this.countDown(60)
+          },5)
+        })
+        .catch((error) => {
+          this.$message.error(error)
+        })
+        .finally(() => {
+        });
     },
-    mounted() {
-      // this.sendSmsVerifyCode();
+    slideFail(){
+      this.$message.error("验证失败，请重新滑动");
     },
-    events(){
-      
+    login() {
+      this.loading = true;
+      ajax({
+        url: '/auth/fastlogin.json',
+        method: 'post',
+        params: {
+          phone: this.userInfo.username,
+          vertifyCode: this.userInfo.vertifyCode,
+          loginRole: 1,
+          source: "1",
+        },
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          if (data.flag === false) {
+            this.$message.error(data.message);
+            return;
+          }
+          if (data !== null && data.token !== '') {
+              this.$emit('loginSuccess', data.token);
+          }
+        })
+        .catch((error) => {
+          this.$message.error(error)
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    methods: {
 
-      sendSmsVerifyCode(){
-        this.sendSmsVerifyCodeLoading = true;
-        ajax({
-          url: '/auth/sendSmsVerifyCode.json',
-          method: 'post',
-          params: {
-            phone: this.userInfo.username,
-            source: "1",
-            codeType: 3,
-          },
-          controller: new AbortController(),
+    getWxQr(key){
+      console.info(key);
+      if(key === 1 || key === 3){
+        return;
+      }
+      ajax({
+        url: '/auth/getWxQr.json',
+        method: 'get',
+        params: {},
+        controller: new AbortController(),
+      })
+        .then((data) => {
+          if (data.flag === false) {
+            this.$message.error(data.message);
+            return;
+          }
+          console.info(data);
+          this.wxQr = data;
+          console.info(this.wxQr.src);
+          // let bytes = new Uint8Array(data.imageBuffer);
+          // console.info(bytes);
+          // let imageString = "";
+          // for (let i = 0; i < bytes.byteLength; i++) {
+          //   imageString += String.fromCharCode(bytes[i]);
+          // }
+          // this.wxQr.src = "data:image/png;base64," + window.btoa(imageString);
+          // this.$message.success("获取验证码成功");
+          
         })
-          .then((data) => {
-            if (data.flag === false) {
-              this.$message.error(data.message);
-              return;
-            }
-            this.$message.success("获取验证码成功");
-          })
-          .catch((error) => {
-            this.$message.error(error)
-          })
-          .finally(() => {
-            this.sendSmsVerifyCodeLoading = false;
-          });
-      },
-      login() {
-        console.info(this.$message);
-        this.loading = true;
-        ajax({
-          url: '/auth/fastlogin.json',
-          method: 'post',
-          params: {
-            phone: this.userInfo.username,
-            vertifyCode: this.userInfo.vertifyCode,
-            loginRole: 1,
-            source: "1",
-          },
-          controller: new AbortController(),
+        .catch((error) => {
+          this.$message.error(error)
         })
-          .then((data) => {
-            if (data.flag === false) {
-              this.$message.error(data.message);
-              return;
-            }
-            if (data !== null && data.token !== '') {
-                this.$emit('loginSuccess', data.token);
-            }
-          })
-          .catch((error) => {
-            this.$message.error(error)
-          })
-          .finally(() => {
-            this.loading = false;
-          });
-      },
-      setRememberPassword(value) {
-        this.userInfo.rememberPassword = value;
-      },
+        .finally(() => {
+        });
     },
-  };
+  },
+};
 </script>
 
 <style lang="less">
@@ -162,6 +274,9 @@
   height: 90%;
 
   .login-form {
+    margin-top: 30px;
+
+
     .arco-form-item-wrapper-col {
       padding: 8px;
     }
@@ -182,11 +297,25 @@
 
     .verifycode{
 
+      .arco-btn-icon {
+        display: none;
+      }
+
+      .arco-btn-loading {
+        background-color: #fe2c55;
+        border-color: transparent;
+      }
+
       .arco-btn-primary {
         height: 36px;
         line-height: 0px;
         font-weight: 400;
         font-size: 14px;
+
+        &:hover{
+          background-color: #fe2c55;
+          border-color: transparent;
+        }
       }
     }
 
@@ -261,16 +390,10 @@
     font-size: 18px;
   }
 
-  .arco-tabs-pane {
-    width: 320px;
-    height: 250px;
-  }
-
   .arco-btn-primary {
     width: 100%;
     height: 48px;
     color: #fff;
-    font-weight: 500;
     font-weight: 500;
     font-size: 16px;
     line-height: 48px;
@@ -281,6 +404,11 @@
     border: none;
     border-radius: 4px;
     outline: none;
+
+    &:hover{
+      background-color: #fe2c55;
+      border-color: transparent;
+    }
   }
 
   .arco-form-item-message {
@@ -290,6 +418,48 @@
   .arco-icon {
     width: 1.5em;
     height: 1.5em;
+  }
+
+  .tab-pane-2{
+
+    .img-title{
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+   .qr-img {
+    width: 200px;
+    height: 200px;
+    }
+  }
+  
+}
+
+
+.slide-modal {
+  // padding: 24px 38px 40px;
+  font-weight: 500;
+  font-size: 24px;
+  // background: #fff
+  //   url(https://lf1-cdn-tos.bytegoofy.com/goofy/ies/douyin_web/image/login-resetpwd-bg.d8696d27.png)
+  //   no-repeat;
+  background-size: 190% auto;
+  border-radius: 8px;
+
+  .arco-modal-header {
+    margin-bottom: 12px;
+  }
+
+  .arco-modal-title {
+    font-weight: 500;
+    font-size: 24px;
+  }
+
+  .arco-modal-footer {
+    display: none;
   }
 }
 </style>

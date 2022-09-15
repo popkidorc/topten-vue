@@ -15,18 +15,14 @@
             <div class="prev-btn">点击预览</div>
           </div>
         </div>
-
         <div>
           <a-modal
             v-model:visible="pdfVisible"
             modal-class="pdf-modal"
             body-class="pdf-modal-body"
-            simple="true"
-            hide-cancel="true"
-            hide-ok="true"
             @cancel="handleLoginCancel"
           >
-            <PdfView :source="pdfSrc" />
+            <PdfView :src="reportDetail.resourceVo.downloadUrl"/>
           </a-modal>
         </div>
 
@@ -52,6 +48,7 @@
             </div>
           </div>
         </div>
+
 
         <div class="comment">
           <a-comment
@@ -105,14 +102,6 @@
         >
           <template #item="{ item }">
             <a-list-item>
-              <!-- <a-card hoverable @click="detail(item)">
-                <template #cover>
-                  <div class="img-div">
-                    <img class="img" alt="dessert" :src="item.imageUrl" />
-                  </div>
-                </template>
-                <a-card-meta :title="item.name"> </a-card-meta>
-              </a-card> -->
               <ReportCardSmallView :item="item"/>
             </a-list-item>
           </template>
@@ -128,9 +117,6 @@ import PdfView from '../../components/pdfView.vue';
 import ReportCardSmallView from '../../components/reportCardSmallView.vue';
 
 export default {
-  components: {
-    PdfView,
-  },
   data() {
     return {
       loading: false,
@@ -139,13 +125,13 @@ export default {
         imageResourceVo:{},
         resourceVo:{}
       },
-      pdfSrc:"",
       recommendReportList: [],
       pdfVisible: false,
       show: true,
     };
   },
   components: {
+    PdfView,
     ReportCardSmallView,
   },
   watch: {
@@ -176,6 +162,7 @@ export default {
             return;
           }
           this.reportDetail = data;
+          console.info(this.reportDetail.resourceVo.downloadUrl);
         })
         .catch((error) => {
           this.$message.error(error)
@@ -455,38 +442,51 @@ export default {
     }
   }
 
-  .pdf-modal {
-    width: 80%;
-    height: 80%;
-    padding: 0 0 0;
+.pdf-modal {
+  width: 80%;
+  height: 80%;
+  padding: 0 0 0;
+  font-weight: 500;
+  font-size: 24px;
+  background-color: transparent;
+  // border-radius: 8px;
+
+  .arco-modal-header {
+    display: block;
+    padding: 0px;
+    margin-bottom: 0;
+    border-bottom: none;
+    background: rgba(54, 55, 65, 0.8);
+    border-radius: 8px 8px 0px 0px;
+    float: right;
+
+    .arco-modal-close-btn {
+      margin-left: 0px;
+      color: #fff;
+    }
+  }
+
+  .arco-modal-title {
     font-weight: 500;
     font-size: 24px;
-    border-radius: 8px;
-
-    .arco-modal-header {
-      margin-bottom: 0;
-    }
-
-    .arco-modal-title {
-      font-weight: 500;
-      font-size: 24px;
-    }
-
-    .arco-modal-footer {
-      display: none;
-    }
   }
 
-  .pdf-modal-body {
-    position: relative;
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    border-radius: 8px;
+  .arco-modal-footer {
+    display: none;
   }
+}
+
+.pdf-modal-body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  // box-sizing: border-box;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+  background: rgba(54, 55, 65, 0.8);
+  border-radius: 0px 0px 8px 8px;
+}
 </style>

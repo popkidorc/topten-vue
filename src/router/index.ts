@@ -48,6 +48,11 @@ const router = createRouter({
           name: 'create',
           component: () => import('@/views/report/createView.vue'),
         },
+        {
+          path: '/searchResult',
+          name: 'searchResult',
+          component: () => import('@/views/report/searchResultView.vue'),
+        },
       ],
     },
     {

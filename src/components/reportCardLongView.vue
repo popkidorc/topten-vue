@@ -55,17 +55,15 @@
   .arco-card {
     display: flex;
     background: transparent;
+    height: 135px;
 
     .arco-card-cover {
-      /* position: absolute;
-    justify-content: center; */
-      width: 240px;
-      height: 160px;
+      width: 40%;
       overflow: hidden;
 
       .img-div,
       .img {
-        width: 100%;
+        height: 100%;
         overflow: hidden;
         transition-duration: 0.4s;
       }
@@ -74,7 +72,6 @@
     .arco-card-body {
       position: relative;
       flex: 1 1;
-      height: 160px;
       padding: 16px 20px 16px;
       overflow: hidden;
       text-shadow: 0 0 4px rgb(0 0 0 / 10%);
@@ -126,7 +123,7 @@
 
     &:hover {
       .img {
-        width: 105%;
+        height: 105%;
         transition-duration: 0.4s;
       }
     }

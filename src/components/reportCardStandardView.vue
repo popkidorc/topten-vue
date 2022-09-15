@@ -52,16 +52,18 @@
 .reportCardStandardView {
   .arco-card {
     background: transparent;
+    height: 250px;
+    // width: 195px;
 
     .arco-card-cover {
-      height: 160px;
+      height: 60%;
       overflow: hidden;
-      border-radius: var(--border-radius-large) var(--border-radius-large) 0
-        0;
+      border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
 
       .img-div,
       .img {
-        height: 100%;
+        max-height: 100%;
+        max-width: 100%;
         overflow: hidden;
         transition-duration: 0.4s;
       }
@@ -115,7 +117,7 @@
 
     &:hover {
       .img {
-        height: 105%;
+        height: 95%;
         transition-duration: 0.4s;
       }
     }

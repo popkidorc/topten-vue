@@ -40,10 +40,11 @@
 .reportCardSmallView {
   .arco-card {
     background: transparent;
+    height: 140px;
 
     .arco-card-cover {
-      width: 210px;
-      height: 140px;
+      // height: 140px;
+      width: 40%;
       overflow: hidden;
       border-radius: var(--border-radius-large) var(--border-radius-large)
         0 0;
